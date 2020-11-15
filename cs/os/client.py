@@ -33,7 +33,7 @@ def test_async():
     pool.start()
 
     lt: [AsyncTask] = []
-    for i in range(10):
+    for i in range(1):
         task = AsyncTask(func=logic)
         lt.append(task)
         pool.put(task)
@@ -42,7 +42,10 @@ def test_async():
     for asynctask in lt:
         print('{} rs is: {}'.format(str(asynctask), asynctask.get_result()))
 
+    time.sleep(3)
+    pool.size()
     pool.shutdown()
+    pool.size()
 
 
 if __name__ == '__main__':
