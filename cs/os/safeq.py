@@ -22,9 +22,9 @@ class SafeQueue:
     # 构造函数，容量默认无穷大
     def __init__(self, maxlen=0):
         self.q = []
+        # 条件变量
         self.cond = threading.Condition()
         self.maxlen = maxlen
-        pass
 
     # 队列size
     def size(self):
@@ -32,16 +32,15 @@ class SafeQueue:
         size = len(self.q)
         self.cond.release()
         return size
-        pass
 
     # 向安全队列中添加元素
     def put(self, item, timeout=2):
-
         # 添加元素时队列满则阻塞，默认两秒
         if self.maxlen != 0 and self.size() >= self.maxlen:
             self.cond.acquire()
             self.cond.wait(timeout=timeout)
             self.cond.release()
+            # 如果阻塞两秒还是满队列，则抛出异常
             if self.size() >= self.maxlen:
                 raise Exception('队列已满')
 
@@ -50,7 +49,6 @@ class SafeQueue:
         # 有可能存在线程在pop时阻塞，这里添加后唤醒阻塞的线程
         self.cond.notify()
         self.cond.release()
-        pass
 
     # 批量添加
     def put_batch(self, item_list):
@@ -62,20 +60,19 @@ class SafeQueue:
 
     # 弹出一个元素
     def pop(self, timeout=2):
-        if not self.size():
+        if self.size() == 0:
             self.cond.acquire()
             self.cond.wait(timeout=timeout)
             self.cond.release()
 
         # 加锁
         self.cond.acquire()
-        if not len(self.q):
+        if len(self.q) == 0:
             return None
         item = self.q.pop()
         self.cond.notify()
         self.cond.release()
         return item
-        pass
 
     # 获取指定idx的元素
     def get(self, idx):
@@ -83,7 +80,6 @@ class SafeQueue:
         item = self.q[idx]
         self.cond.release()
         return item
-        pass
 
 
 if __name__ == '__main__':
